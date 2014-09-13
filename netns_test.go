@@ -35,3 +35,10 @@ func TestGetNewSetDelete(t *testing.T) {
 		t.Fatal("Reset ns failed", origns, newns, ns)
 	}
 }
+
+func TestNone(t *testing.T) {
+	ns := None()
+	if ns.IsOpen() {
+		t.Fatal("None ns is open", ns)
+	}
+}

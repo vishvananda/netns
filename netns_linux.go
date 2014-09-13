@@ -60,6 +60,9 @@ func (ns NsHandle) Equal(other NsHandle) bool {
 // String shows the file descriptor number and its dev and inode.
 func (ns NsHandle) String() string {
 	var s syscall.Stat_t
+	if ns == -1 {
+		return "NS(None)"
+	}
 	if err := syscall.Fstat(int(ns), &s); err != nil {
 		return fmt.Sprintf("NS(%d: unknown)", ns)
 	}
@@ -79,6 +82,11 @@ func (ns *NsHandle) Close() error {
 	}
 	(*ns) = -1
 	return nil
+}
+
+// Get an empty (closed) NsHandle
+func None() NsHandle {
+	return NsHandle(-1)
 }
 
 // Set sets the current network namespace to the namespace represented
