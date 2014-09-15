@@ -135,6 +135,7 @@ func getThisCgroup(cgroupType string) (string, error) {
 // borrowed from docker/utils/utils.go
 // modified to only return the first pid
 // modified to glob with id
+// modified to search for newer docker containers
 func getPidForContainer(id string) (int, error) {
 	pid := 0
 
@@ -153,24 +154,27 @@ func getPidForContainer(id string) (int, error) {
 
 	id += "*"
 
-	filename := filepath.Join(cgroupRoot, cgroupThis, id, "tasks")
-	filenames, _ := filepath.Glob(filename)
-	if len(filenames) > 1 {
-		return pid, fmt.Errorf("Ambiguous id supplied: %v", filenames)
-	} else if len(filenames) == 1 {
-		filename = filenames[0]
-	}
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
+	attempts := []string{
+		filepath.Join(cgroupRoot, cgroupThis, id, "tasks"),
 		// With more recent lxc versions use, cgroup will be in lxc/
-		filename = filepath.Join(cgroupRoot, cgroupThis, "lxc", id, "tasks")
-		filenames, _ = filepath.Glob(filename)
+		filepath.Join(cgroupRoot, cgroupThis, "lxc", id, "tasks"),
+		// With more recent dockee, cgroup will be in docker/
+		filepath.Join(cgroupRoot, cgroupThis, "docker", id, "tasks"),
+	}
+
+	var filename string
+	for _, attempt := range attempts {
+		filenames, _ := filepath.Glob(attempt)
 		if len(filenames) > 1 {
 			return pid, fmt.Errorf("Ambiguous id supplied: %v", filenames)
 		} else if len(filenames) == 1 {
 			filename = filenames[0]
-		} else {
-			return pid, fmt.Errorf("Unable to find container: %v", id[:len(id)-1])
+			break;
 		}
+	}
+
+	if filename == "" {
+		return pid, fmt.Errorf("Unable to find container: %v", id[:len(id)-1])
 	}
 
 	output, err := ioutil.ReadFile(filename)
