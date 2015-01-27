@@ -47,7 +47,7 @@ func New() (ns NsHandle, err error) {
 
 // Get gets a handle to the current threads network namespace.
 func Get() (NsHandle, error) {
-	return GetFromPid(os.Getpid())
+	return GetFromThread(os.Getpid(), syscall.Gettid())
 }
 
 // GetFromName gets a handle to a named network namespace such as one
@@ -60,7 +60,7 @@ func GetFromName(name string) (NsHandle, error) {
 	return NsHandle(fd), nil
 }
 
-// GetFromName gets a handle to the network namespace of a given pid.
+// GetFromPid gets a handle to the network namespace of a given pid.
 func GetFromPid(pid int) (NsHandle, error) {
 	fd, err := syscall.Open(fmt.Sprintf("/proc/%d/ns/net", pid), syscall.O_RDONLY, 0)
 	if err != nil {
@@ -69,7 +69,17 @@ func GetFromPid(pid int) (NsHandle, error) {
 	return NsHandle(fd), nil
 }
 
-// GetFromName gets a handle to the network namespace of a docker container.
+// GetFromThread gets a handle to the network namespace of a given pid and tid.
+func GetFromThread(pid, tid int) (NsHandle, error) {
+	name := fmt.Sprintf("/proc/%d/task/%d/ns/net", pid, tid)
+	fd, err := syscall.Open(name, syscall.O_RDONLY, 0)
+	if err != nil {
+		return -1, err
+	}
+	return NsHandle(fd), nil
+}
+
+// GetFromDocker gets a handle to the network namespace of a docker container.
 // Id is prefixed matched against the running docker containers, so a short
 // identifier can be used as long as it isn't ambiguous.
 func GetFromDocker(id string) (NsHandle, error) {
@@ -169,7 +179,7 @@ func getPidForContainer(id string) (int, error) {
 			return pid, fmt.Errorf("Ambiguous id supplied: %v", filenames)
 		} else if len(filenames) == 1 {
 			filename = filenames[0]
-			break;
+			break
 		}
 	}
 

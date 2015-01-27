@@ -2,6 +2,7 @@ package netns
 
 import (
 	"runtime"
+	"sync"
 	"testing"
 )
 
@@ -41,4 +42,25 @@ func TestNone(t *testing.T) {
 	if ns.IsOpen() {
 		t.Fatal("None ns is open", ns)
 	}
+}
+
+func TestThreaded(t *testing.T) {
+	ncpu := runtime.GOMAXPROCS(-1)
+	if ncpu < 2 {
+		t.Skip("-cpu=2 or larger required")
+	}
+
+	// Lock this thread simply to ensure other threads get used.
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	wg := &sync.WaitGroup{}
+	for i := 0; i < ncpu; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			TestGetNewSetDelete(t)
+		}()
+	}
+	wg.Wait()
 }
