@@ -3,5 +3,5 @@
 package netns
 
 const (
-	SYS_SETNS = 268
+	SYS_SETNS = 375
 )
