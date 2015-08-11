@@ -170,7 +170,7 @@ func getPidForContainer(id string) (int, error) {
 		// With more recent docker, cgroup will be in docker/
 		filepath.Join(cgroupRoot, cgroupThis, "docker", id, "tasks"),
 		// Even more recent docker versions under systemd use docker-<id>.scope/
-		filepath.Join(cgroupRoot, cgroupThis, "docker-" + id + ".scope", tasks"),
+		filepath.Join(cgroupRoot, "system.slice", "docker-"+id+".scope", "tasks"),
 	}
 
 	var filename string
