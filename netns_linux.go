@@ -13,6 +13,7 @@ import (
 	"syscall"
 )
 
+// SYS_SETNS syscall allows changing the namespace of the current process.
 var SYS_SETNS = map[string]uintptr{
 	"386":     346,
 	"amd64":   308,
@@ -22,8 +23,8 @@ var SYS_SETNS = map[string]uintptr{
 	"s390x":   339,
 }[runtime.GOARCH]
 
+// Deprecated: use syscall pkg instead (go >= 1.5 needed).
 const (
-	// Deprecated: use syscall pkg instead (go >= 1.5 needed).
 	CLONE_NEWUTS  = 0x04000000 /* New utsname group? */
 	CLONE_NEWIPC  = 0x08000000 /* New ipcs */
 	CLONE_NEWUSER = 0x10000000 /* New user namespace */
