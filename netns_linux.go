@@ -7,10 +7,20 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 )
+
+var SYS_SETNS = map[string]uintptr{
+	"386":     346,
+	"amd64":   308,
+	"arm64":   268,
+	"arm":     375,
+	"ppc64le": 350,
+	"s390x":   339,
+}[runtime.GOARCH]
 
 const (
 	// Deprecated: use syscall pkg instead (go >= 1.5 needed).
