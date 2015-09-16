@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	// These constants belong in the syscall library but have not been
-	// added yet.
+	// Deprecated: use syscall pkg instead (go >= 1.5 needed).
 	CLONE_NEWUTS  = 0x04000000 /* New utsname group? */
 	CLONE_NEWIPC  = 0x08000000 /* New ipcs */
 	CLONE_NEWUSER = 0x10000000 /* New user namespace */
