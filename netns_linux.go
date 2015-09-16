@@ -177,7 +177,7 @@ func getPidForContainer(id string) (int, error) {
 		filepath.Join(cgroupRoot, cgroupThis, id, "tasks"),
 		// With more recent lxc versions use, cgroup will be in lxc/
 		filepath.Join(cgroupRoot, cgroupThis, "lxc", id, "tasks"),
-		// With more recent dockee, cgroup will be in docker/
+		// With more recent docker, cgroup will be in docker/
 		filepath.Join(cgroupRoot, cgroupThis, "docker", id, "tasks"),
 	}
 
