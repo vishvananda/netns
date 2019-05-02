@@ -52,7 +52,8 @@ func Set(ns NsHandle) (err error) {
 	return Setns(ns, CLONE_NEWNET)
 }
 
-// New creates a new network namespace and returns a handle to it.
+// New creates a new network namespace, sets it as current and returns
+// a handle to it.
 func New() (ns NsHandle, err error) {
 	if err := syscall.Unshare(CLONE_NEWNET); err != nil {
 		return -1, err
