@@ -23,6 +23,7 @@ var SYS_SETNS = map[string]uintptr{
 	"mipsle":  4344,
 	"ppc64":   350,
 	"ppc64le": 350,
+	"riscv64": 268,
 	"s390x":   339,
 }[runtime.GOARCH]
 
