@@ -52,7 +52,7 @@ func Get() (NsHandle, error) {
 // GetFromPath gets a handle to a network namespace
 // identified by the path
 func GetFromPath(path string) (NsHandle, error) {
-	fd, err := unix.Open(path, unix.O_RDONLY, 0)
+	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_CLOEXEC, 0)
 	if err != nil {
 		return -1, err
 	}
