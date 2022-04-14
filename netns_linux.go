@@ -95,6 +95,15 @@ func DeleteNamedWithDir(name, dir string) error {
 	return os.Remove(namedPath)
 }
 
+func DeleteByPath(path string) error {
+	err := syscall.Unmount(path, syscall.MNT_DETACH)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(path)
+}
+
 // Get gets a handle to the current threads network namespace.
 func Get() (NsHandle, error) {
 	return GetFromThread(os.Getpid(), unix.Gettid())
