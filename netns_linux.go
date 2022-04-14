@@ -16,7 +16,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Deprecated: use syscall pkg instead (go >= 1.5 needed).
 const (
 	CLONE_NEWNET  = syscall.CLONE_NEWNET /* New network namespace */
 	bindMountPath = "/run/netns"         /* Bind mount path for named netns */
@@ -45,33 +44,7 @@ func New() (ns NsHandle, err error) {
 
 // NewNamed creates a new named network namespace and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
-	if _, err := os.Stat(bindMountPath); os.IsNotExist(err) {
-		err = os.MkdirAll(bindMountPath, 0755)
-		if err != nil {
-			return None(), err
-		}
-	}
-
-	newNs, err := New()
-	if err != nil {
-		return None(), err
-	}
-
-	namedPath := path.Join(bindMountPath, name)
-
-	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0444)
-	if err != nil {
-		return None(), err
-	}
-	f.Close()
-
-	nsPath := fmt.Sprintf("/proc/%d/task/%d/ns/net", os.Getpid(), syscall.Gettid())
-	err = syscall.Mount(nsPath, namedPath, "bind", syscall.MS_BIND, "")
-	if err != nil {
-		return None(), err
-	}
-
-	return newNs, nil
+	return NewNamedWithDir(name, bindMountPath)
 }
 
 // NewNamed creates a new named network namespace and returns a handle to it
@@ -107,14 +80,7 @@ func NewNamedWithDir(name, dir string) (NsHandle, error) {
 
 // DeleteNamed deletes a named network namespace
 func DeleteNamed(name string) error {
-	namedPath := path.Join(bindMountPath, name)
-
-	err := syscall.Unmount(namedPath, syscall.MNT_DETACH)
-	if err != nil {
-		return err
-	}
-
-	return os.Remove(namedPath)
+	return DeleteNamedWithDir(name, bindMountPath)
 }
 
 // DeleteNamed deletes a named network namespace
