@@ -16,15 +16,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Deprecated: use syscall pkg instead (go >= 1.5 needed).
 const (
-	CLONE_NEWUTS  = 0x04000000   /* New utsname group? */
-	CLONE_NEWIPC  = 0x08000000   /* New ipcs */
-	CLONE_NEWUSER = 0x10000000   /* New user namespace */
-	CLONE_NEWPID  = 0x20000000   /* New pid namespace */
-	CLONE_NEWNET  = 0x40000000   /* New network namespace */
-	CLONE_IO      = 0x80000000   /* Get io context */
-	bindMountPath = "/run/netns" /* Bind mount path for named netns */
+	CLONE_NEWNET  = syscall.CLONE_NEWNET /* New network namespace */
+	bindMountPath = "/run/netns"         /* Bind mount path for named netns */
 )
 
 // Setns sets namespace using syscall. Note that this should be a method
@@ -50,8 +44,13 @@ func New() (ns NsHandle, err error) {
 
 // NewNamed creates a new named network namespace and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
-	if _, err := os.Stat(bindMountPath); os.IsNotExist(err) {
-		err = os.MkdirAll(bindMountPath, 0755)
+	return NewNamedWithDir(name, bindMountPath)
+}
+
+// NewNamed creates a new named network namespace and returns a handle to it
+func NewNamedWithDir(name, dir string) (NsHandle, error) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
 		if err != nil {
 			return None(), err
 		}
@@ -62,7 +61,7 @@ func NewNamed(name string) (NsHandle, error) {
 		return None(), err
 	}
 
-	namedPath := path.Join(bindMountPath, name)
+	namedPath := path.Join(dir, name)
 
 	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0444)
 	if err != nil {
@@ -81,7 +80,12 @@ func NewNamed(name string) (NsHandle, error) {
 
 // DeleteNamed deletes a named network namespace
 func DeleteNamed(name string) error {
-	namedPath := path.Join(bindMountPath, name)
+	return DeleteNamedWithDir(name, bindMountPath)
+}
+
+// DeleteNamed deletes a named network namespace
+func DeleteNamedWithDir(name, dir string) error {
+	namedPath := path.Join(dir, name)
 
 	err := syscall.Unmount(namedPath, syscall.MNT_DETACH)
 	if err != nil {
@@ -89,6 +93,15 @@ func DeleteNamed(name string) error {
 	}
 
 	return os.Remove(namedPath)
+}
+
+func DeleteByPath(path string) error {
+	err := syscall.Unmount(path, syscall.MNT_DETACH)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(path)
 }
 
 // Get gets a handle to the current threads network namespace.
