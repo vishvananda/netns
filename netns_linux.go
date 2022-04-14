@@ -18,13 +18,8 @@ import (
 
 // Deprecated: use syscall pkg instead (go >= 1.5 needed).
 const (
-	CLONE_NEWUTS  = 0x04000000   /* New utsname group? */
-	CLONE_NEWIPC  = 0x08000000   /* New ipcs */
-	CLONE_NEWUSER = 0x10000000   /* New user namespace */
-	CLONE_NEWPID  = 0x20000000   /* New pid namespace */
-	CLONE_NEWNET  = 0x40000000   /* New network namespace */
-	CLONE_IO      = 0x80000000   /* Get io context */
-	bindMountPath = "/run/netns" /* Bind mount path for named netns */
+	CLONE_NEWNET  = syscall.CLONE_NEWNET /* New network namespace */
+	bindMountPath = "/run/netns"         /* Bind mount path for named netns */
 )
 
 // Setns sets namespace using syscall. Note that this should be a method
@@ -79,9 +74,52 @@ func NewNamed(name string) (NsHandle, error) {
 	return newNs, nil
 }
 
+// NewNamed creates a new named network namespace and returns a handle to it
+func NewNamedWithDir(name, dir string) (NsHandle, error) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return None(), err
+		}
+	}
+
+	newNs, err := New()
+	if err != nil {
+		return None(), err
+	}
+
+	namedPath := path.Join(dir, name)
+
+	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0444)
+	if err != nil {
+		return None(), err
+	}
+	f.Close()
+
+	nsPath := fmt.Sprintf("/proc/%d/task/%d/ns/net", os.Getpid(), syscall.Gettid())
+	err = syscall.Mount(nsPath, namedPath, "bind", syscall.MS_BIND, "")
+	if err != nil {
+		return None(), err
+	}
+
+	return newNs, nil
+}
+
 // DeleteNamed deletes a named network namespace
 func DeleteNamed(name string) error {
 	namedPath := path.Join(bindMountPath, name)
+
+	err := syscall.Unmount(namedPath, syscall.MNT_DETACH)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(namedPath)
+}
+
+// DeleteNamed deletes a named network namespace
+func DeleteNamedWithDir(name, dir string) error {
+	namedPath := path.Join(dir, name)
 
 	err := syscall.Unmount(namedPath, syscall.MNT_DETACH)
 	if err != nil {
