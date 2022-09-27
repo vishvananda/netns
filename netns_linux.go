@@ -48,7 +48,8 @@ func New() (ns NsHandle, err error) {
 	return Get()
 }
 
-// NewNamed creates a new named network namespace and returns a handle to it
+// NewNamed creates a new named network namespace, sets it as current,
+// and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
 	if _, err := os.Stat(bindMountPath); os.IsNotExist(err) {
 		err = os.MkdirAll(bindMountPath, 0755)
