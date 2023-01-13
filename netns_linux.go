@@ -20,8 +20,9 @@ const (
 	CLONE_NEWPID  = unix.CLONE_NEWPID  /* New pid namespace */
 	CLONE_NEWNET  = unix.CLONE_NEWNET  /* New network namespace */
 	CLONE_IO      = unix.CLONE_IO      /* Get io context */
-	bindMountPath = "/run/netns"       /* Bind mount path for named netns */
 )
+
+const bindMountPath = "/run/netns" /* Bind mount path for named netns */
 
 // Setns sets namespace using golang.org/x/sys/unix.Setns.
 //
