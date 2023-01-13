@@ -71,7 +71,7 @@ func (ns *NsHandle) Close() error {
 	if err := unix.Close(int(*ns)); err != nil {
 		return err
 	}
-	(*ns) = -1
+	*ns = -1
 	return nil
 }
 
