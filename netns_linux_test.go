@@ -24,7 +24,9 @@ func TestGetNewSetDelete(t *testing.T) {
 	if err := Set(origns); err != nil {
 		t.Fatal(err)
 	}
-	newns.Close()
+	if err := newns.Close(); err != nil {
+		t.Error("Failed to close ns", err)
+	}
 	if newns.IsOpen() {
 		t.Fatal("newns still open after close", newns)
 	}
