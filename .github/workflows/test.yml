@@ -1,0 +1,45 @@
+name: test
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  test:
+    permissions:
+      contents: read      # for actions/checkout to fetch code
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        # test against the "oldest" supported version and the current version
+        # of go. Go 1.17 is kept in this matrix as it is the minimum version
+        # specified in go.mod, and maintaining compatibility with go 1.17 is
+        # currently not much of a burden. Most projects using this module are
+        # using newer versions than that, so we can drop the old version if
+        # it becomes too much of a burden.
+        go-version: [1.17.x, stable]
+        os: [ubuntu-20.04, ubuntu-22.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: go mod tidy
+      run: |
+        go mod tidy
+        git diff --exit-code
+    - name: Test
+      run: |
+        go test -exec "sudo -n" -v ./...
+
