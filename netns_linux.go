@@ -108,7 +108,7 @@ func GetFromPath(path string) (NsHandle, error) {
 // GetFromName gets a handle to a named network namespace such as one
 // created by `ip netns add`.
 func GetFromName(name string) (NsHandle, error) {
-	return GetFromPath(fmt.Sprintf("/var/run/netns/%s", name))
+	return GetFromPath(filepath.Join(bindMountPath, name))
 }
 
 // GetFromPid gets a handle to the network namespace of a given pid.
