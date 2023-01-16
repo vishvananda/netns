@@ -1,7 +1,10 @@
 version: 2
 updates:
-  # Dependencies listed in go.mod
-  - package-ecosystem: "gomod"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "gomod"  # Dependencies listed in go.mod
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
