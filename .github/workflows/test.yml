@@ -14,7 +14,8 @@ on:
 jobs:
   test:
     permissions:
-      contents: read      # for actions/checkout to fetch code
+      # for actions/checkout to fetch code
+      contents: read
     timeout-minutes: 10
 
     strategy:
@@ -42,4 +43,3 @@ jobs:
     - name: Test
       run: |
         go test -exec "sudo -n" -v ./...
-
