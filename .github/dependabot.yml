@@ -4,7 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-  - package-ecosystem: "gomod"  # Dependencies listed in go.mod
-    directory: "/" # Location of package manifests
+  # Dependencies listed in go.mod
+  - package-ecosystem: "gomod"
+    # Location of package manifests
+    directory: "/"
     schedule:
       interval: "weekly"
