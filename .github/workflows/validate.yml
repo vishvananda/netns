@@ -35,6 +35,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: YAML Lint
+        if: runner.os == 'Linux'
         uses: ibiqlik/action-yamllint@v3
         with:
           format: auto
