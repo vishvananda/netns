@@ -14,8 +14,7 @@ on:
 jobs:
   test:
     permissions:
-      # for actions/checkout to fetch code
-      contents: read
+      contents: read  # for actions/checkout to fetch code
     timeout-minutes: 10
 
     strategy:
