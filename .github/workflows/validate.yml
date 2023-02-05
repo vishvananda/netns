@@ -14,10 +14,8 @@ on:
 jobs:
   linters:
     permissions:
-      # for actions/checkout to fetch code
-      contents: read
-      # for golangci/golangci-lint-action to fetch pull requests
-      pull-requests: read
+      contents: read  # for actions/checkout to fetch code
+      pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     timeout-minutes: 10
 
     strategy:
