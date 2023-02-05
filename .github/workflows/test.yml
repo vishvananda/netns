@@ -14,7 +14,7 @@ on:
 jobs:
   test:
     permissions:
-      contents: read      # for actions/checkout to fetch code
+      contents: read  # for actions/checkout to fetch code
     timeout-minutes: 10
 
     strategy:
@@ -29,17 +29,15 @@ jobs:
         os: [ubuntu-20.04, ubuntu-22.04, windows-2022]
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: ${{ matrix.go-version }}
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: go mod tidy
-      run: |
-        go mod tidy
-        git diff --exit-code
-    - name: Test
-      run: |
-        go test -exec "sudo -n" -v ./...
-
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: go mod tidy
+        run: |
+          go mod tidy
+          git diff --exit-code
+      - name: Test
+        run: go test -exec "sudo -n" -v ./...
