@@ -1,6 +1,7 @@
 linters:
   enable:
     - errorlint
+    - misspell
 
 run:
   timeout: 5m
