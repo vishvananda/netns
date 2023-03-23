@@ -276,7 +276,7 @@ func getPidForContainer(id string) (int, error) {
 
 	pid, err = strconv.Atoi(result[0])
 	if err != nil {
-		return pid, fmt.Errorf("Invalid pid '%s': %s", result[0], err)
+		return pid, fmt.Errorf("Invalid pid '%s': %w", result[0], err)
 	}
 
 	return pid, nil
