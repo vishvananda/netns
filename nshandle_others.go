@@ -9,7 +9,7 @@ type NsHandle int
 
 // Equal determines if two network handles refer to the same network
 // namespace. It is only implemented on Linux.
-func (ns NsHandle) Equal(ns NsHandle) bool {
+func (ns NsHandle) Equal(_ NsHandle) bool {
 	return false
 }
 

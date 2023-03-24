@@ -26,19 +26,19 @@ const bindMountPath = "/run/netns" /* Bind mount path for named netns */
 // Setns sets namespace using golang.org/x/sys/unix.Setns.
 //
 // Deprecated: Use golang.org/x/sys/unix.Setns instead.
-func Setns(ns NsHandle, nstype int) (err error) {
+func Setns(ns NsHandle, nstype int) error {
 	return unix.Setns(int(ns), nstype)
 }
 
 // Set sets the current network namespace to the namespace represented
 // by NsHandle.
-func Set(ns NsHandle) (err error) {
+func Set(ns NsHandle) error {
 	return unix.Setns(int(ns), unix.CLONE_NEWNET)
 }
 
 // New creates a new network namespace, sets it as current and returns
 // a handle to it.
-func New() (ns NsHandle, err error) {
+func New() (NsHandle, error) {
 	if err := unix.Unshare(unix.CLONE_NEWNET); err != nil {
 		return -1, err
 	}
