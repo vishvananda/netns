@@ -2,10 +2,18 @@ linters:
   enable:
     - errcheck
     - errorlint
+    - gocritic
+    - gosec
+    - gosimple
+    - govet
     - gci
     - misspell
     - nonamedreturns
     - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
 
 linters-settings:
   gci:
