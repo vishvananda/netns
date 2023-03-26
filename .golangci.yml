@@ -1,2 +1,18 @@
+linters:
+  enable:
+    - errcheck
+    - errorlint
+    - gci
+    - misspell
+    - nonamedreturns
+    - staticcheck
+
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/vishvananda)
+
 run:
   timeout: 5m
