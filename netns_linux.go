@@ -49,7 +49,7 @@ func New() (NsHandle, error) {
 // and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
 	if _, err := os.Stat(bindMountPath); os.IsNotExist(err) {
-		err = os.MkdirAll(bindMountPath, 0755)
+		err = os.MkdirAll(bindMountPath, 0o755)
 		if err != nil {
 			return None(), err
 		}
@@ -62,7 +62,7 @@ func NewNamed(name string) (NsHandle, error) {
 
 	namedPath := path.Join(bindMountPath, name)
 
-	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0444)
+	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0o444)
 	if err != nil {
 		newNs.Close()
 		return None(), err
@@ -217,11 +217,12 @@ func getPidForContainer(id string) (int, error) {
 	id += "*"
 
 	var pidFile string
-	if cgroupVer == 1 {
+	switch cgroupVer {
+	case 1:
 		pidFile = "tasks"
-	} else if cgroupVer == 2 {
+	case 2:
 		pidFile = "cgroup.procs"
-	} else {
+	default:
 		return -1, fmt.Errorf("Invalid cgroup version '%d'", cgroupVer)
 	}
 

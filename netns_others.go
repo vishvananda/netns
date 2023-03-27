@@ -3,13 +3,9 @@
 
 package netns
 
-import (
-	"errors"
-)
+import "errors"
 
-var (
-	ErrNotImplemented = errors.New("not implemented")
-)
+var ErrNotImplemented = errors.New("not implemented")
 
 // Setns sets namespace using golang.org/x/sys/unix.Setns on Linux. It
 // is not implemented on other platforms.
