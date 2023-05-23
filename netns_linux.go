@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -39,6 +40,8 @@ func Set(ns NsHandle) error {
 // New creates a new network namespace, sets it as current and returns
 // a handle to it.
 func New() (NsHandle, error) {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 	if err := unix.Unshare(unix.CLONE_NEWNET); err != nil {
 		return -1, err
 	}
