@@ -51,6 +51,14 @@ func GetFromThread(pid int, tid int) (NsHandle, error) {
 	return -1, ErrNotImplemented
 }
 
+func GetFromPidWithAltProcfs(pid int, procfs string) (NsHandle, error) {
+	return -1, ErrNotImplemented
+}
+
+func GetFromThreadWithAltProcfs(pid, tid int, procfs string) (NsHandle, error) {
+	return -1, ErrNotImplemented
+}
+
 func GetFromDocker(id string) (NsHandle, error) {
 	return -1, ErrNotImplemented
 }
