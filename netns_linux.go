@@ -248,6 +248,10 @@ func getPidForContainer(id string) (int, error) {
 		filepath.Join(cgroupRoot, "kubepods.slice", "*.slice", "*", "docker-"+id+".scope", pidFile),
 		// Same as above but for Guaranteed QoS
 		filepath.Join(cgroupRoot, "kubepods.slice", "*", "docker-"+id+".scope", pidFile),
+		// Support for nerdctl
+		filepath.Join(cgroupRoot, "system.slice", "nerdctl-"+id+".scope", pidFile),
+		// Support for finch
+		filepath.Join(cgroupRoot, "..", "systemd", "finch", id, pidFile),
 	}
 
 	var filename string
