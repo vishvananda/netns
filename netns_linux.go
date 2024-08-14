@@ -122,6 +122,18 @@ func GetFromThread(pid, tid int) (NsHandle, error) {
 	return GetFromPath(fmt.Sprintf("/proc/%d/task/%d/ns/net", pid, tid))
 }
 
+// GetFromPidWithAltProcfs gets a handle to the network namespace of a given
+// pid using the specified procfs path.
+func GetFromPidWithAltProcfs(pid int, procfs string) (NsHandle, error) {
+	return GetFromPath(fmt.Sprintf("%s/%d/ns/net", procfs, pid))
+}
+
+// GetFromThreadWithAltProcfs gets a handle to the network namespace of a given
+// pid and tid using the specified procfs path.
+func GetFromThreadWithAltProcfs(pid, tid int, procfs string) (NsHandle, error) {
+	return GetFromPath(fmt.Sprintf("%s/%d/task/%d/ns/net", procfs, pid, tid))
+}
+
 // GetFromDocker gets a handle to the network namespace of a docker container.
 // Id is prefixed matched against the running docker containers, so a short
 // identifier can be used as long as it isn't ambiguous.
