@@ -13,6 +13,12 @@ func (ns NsHandle) Equal(_ NsHandle) bool {
 	return false
 }
 
+// Name returns the name of the network namespace associated with the
+// handle. It is only implemented on Linux.
+func (ns NsHandle) Name() (string, error) {
+	return "", nil
+}
+
 // String shows the file descriptor number and its dev and inode.
 // It is only implemented on Linux, and returns "NS(none)" on other
 // platforms.
