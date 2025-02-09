@@ -12,7 +12,7 @@ You can use go get command:
 
 Testing (requires root):
 
-    sudo -E go test github.com/vishvananda/netns
+    unshare -rn go test github.com/vishvananda/netns
 
 ## Example ##
 
