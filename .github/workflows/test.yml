@@ -20,12 +20,8 @@ jobs:
     strategy:
       matrix:
         # test against the "oldest" supported version and the current version
-        # of go. Go 1.17 is kept in this matrix as it is the minimum version
-        # specified in go.mod, and maintaining compatibility with go 1.17 is
-        # currently not much of a burden. Most projects using this module are
-        # using newer versions than that, so we can drop the old version if
-        # it becomes too much of a burden.
-        go-version: [1.17.x, stable]
+        # of go.
+        go-version: [1.23.x, stable]
         os: [ubuntu-24.04, ubuntu-22.04, windows-2022]
     runs-on: ${{ matrix.os }}
     steps:
