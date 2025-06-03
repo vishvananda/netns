@@ -4,6 +4,3 @@ extends: default
 rules:
   document-start: disable
   line-length: disable
-  truthy:
-    ignore: |
-      .github/workflows/*.yml
