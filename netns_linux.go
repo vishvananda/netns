@@ -223,7 +223,7 @@ func getPidForContainer(id string) (int, error) {
 	case 2:
 		pidFile = "cgroup.procs"
 	default:
-		return -1, fmt.Errorf("Invalid cgroup version '%d'", cgroupVer)
+		return -1, fmt.Errorf("invalid cgroup version '%d'", cgroupVer)
 	}
 
 	attempts := []string{
@@ -258,7 +258,7 @@ func getPidForContainer(id string) (int, error) {
 	for _, attempt := range attempts {
 		filenames, _ := filepath.Glob(attempt)
 		if len(filenames) > 1 {
-			return pid, fmt.Errorf("Ambiguous id supplied: %v", filenames)
+			return pid, fmt.Errorf("ambiguous id supplied: %v", filenames)
 		} else if len(filenames) == 1 {
 			filename = filenames[0]
 			break
@@ -266,7 +266,7 @@ func getPidForContainer(id string) (int, error) {
 	}
 
 	if filename == "" {
-		return pid, fmt.Errorf("Unable to find container: %v", id[:len(id)-1])
+		return pid, fmt.Errorf("unable to find container: %v", id[:len(id)-1])
 	}
 
 	output, err := os.ReadFile(filename)
@@ -276,12 +276,12 @@ func getPidForContainer(id string) (int, error) {
 
 	result := strings.Split(string(output), "\n")
 	if len(result) == 0 || len(result[0]) == 0 {
-		return pid, fmt.Errorf("No pid found for container")
+		return pid, fmt.Errorf("no pid found for container")
 	}
 
 	pid, err = strconv.Atoi(result[0])
 	if err != nil {
-		return pid, fmt.Errorf("Invalid pid '%s': %w", result[0], err)
+		return pid, fmt.Errorf("invalid pid '%s': %w", result[0], err)
 	}
 
 	return pid, nil
