@@ -34,9 +34,9 @@ jobs:
         uses: actions/checkout@v4
       - name: YAML Lint
         if: runner.os == 'Linux'
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          format: auto
+        # yamllint is installed in GitHub Actions base runner image: https://github.com/adrienverge/yamllint/pull/588
+        run: yamllint .
+
       - name: Golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
