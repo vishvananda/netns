@@ -23,7 +23,7 @@ jobs:
         # We only run on the latest version of go, as some linters may be
         # version-dependent (for example gofmt can change between releases).
         go-version: [stable]
-        os: [ubuntu-22.04, windows-2022]
+        os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go

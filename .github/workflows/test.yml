@@ -26,7 +26,7 @@ jobs:
         # using newer versions than that, so we can drop the old version if
         # it becomes too much of a burden.
         go-version: [1.17.x, stable]
-        os: [ubuntu-20.04, ubuntu-22.04, windows-2022]
+        os: [ubuntu-24.04, ubuntu-22.04, windows-2022]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go
