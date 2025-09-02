@@ -30,7 +30,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: YAML Lint
         if: runner.os == 'Linux'
