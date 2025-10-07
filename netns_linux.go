@@ -21,7 +21,43 @@ const (
 	CLONE_IO      = unix.CLONE_IO      /* Get io context */
 )
 
-const bindMountPath = "/run/netns" /* Bind mount path for named netns */
+// For backward compatibility we keep the old path and use as fallback path
+// the one used in iproute2 by default.
+// Ref: https://github.com/vishvananda/netns/issues/106
+const (
+	bindMountPath     = "/run/netns"     /* Bind mount path for named netns */
+	fallbackMountPath = "/var/run/netns" /* Fallback bind mount path (iproute2 convention) */
+)
+
+// getNetnsPath returns the appropriate path for network namespaces.
+// It tries bindMountPath first for backward compatibility, then falls back to fallbackMountPath.
+func getNetnsPath() string {
+	if _, err := os.Stat(bindMountPath); err == nil {
+		return bindMountPath
+	}
+	if _, err := os.Stat(fallbackMountPath); err == nil {
+		return fallbackMountPath
+	}
+	// Neither exists, default to original path for backward compatibility
+	return bindMountPath
+}
+
+// getNetnsPathForName returns the full path for a named network namespace.
+// It first checks if the namespace exists in bindMountPath, then in fallbackMountPath.
+func getNetnsPathForName(name string) string {
+	primaryPath := filepath.Join(bindMountPath, name)
+	if _, err := os.Stat(primaryPath); err == nil {
+		return primaryPath
+	}
+
+	fallbackPath := filepath.Join(fallbackMountPath, name)
+	if _, err := os.Stat(fallbackPath); err == nil {
+		return fallbackPath
+	}
+
+	// If neither exists, return the path based on directory availability for consistency
+	return filepath.Join(getNetnsPath(), name)
+}
 
 // Setns sets namespace using golang.org/x/sys/unix.Setns.
 //
@@ -48,11 +84,10 @@ func New() (NsHandle, error) {
 // NewNamed creates a new named network namespace, sets it as current,
 // and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
-	if _, err := os.Stat(bindMountPath); os.IsNotExist(err) {
-		err = os.MkdirAll(bindMountPath, 0o755)
-		if err != nil {
-			return None(), err
-		}
+	// Determine which directory to use and ensure it exists
+	netnsDir := getNetnsPath()
+	if err := os.MkdirAll(netnsDir, 0o755); err != nil {
+		return None(), err
 	}
 
 	newNs, err := New()
@@ -60,7 +95,7 @@ func NewNamed(name string) (NsHandle, error) {
 		return None(), err
 	}
 
-	namedPath := path.Join(bindMountPath, name)
+	namedPath := path.Join(netnsDir, name)
 
 	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0o444)
 	if err != nil {
@@ -81,7 +116,7 @@ func NewNamed(name string) (NsHandle, error) {
 
 // DeleteNamed deletes a named network namespace
 func DeleteNamed(name string) error {
-	namedPath := path.Join(bindMountPath, name)
+	namedPath := getNetnsPathForName(name)
 
 	err := unix.Unmount(namedPath, unix.MNT_DETACH)
 	if err != nil {
@@ -109,7 +144,7 @@ func GetFromPath(path string) (NsHandle, error) {
 // GetFromName gets a handle to a named network namespace such as one
 // created by `ip netns add`.
 func GetFromName(name string) (NsHandle, error) {
-	return GetFromPath(filepath.Join(bindMountPath, name))
+	return GetFromPath(getNetnsPathForName(name))
 }
 
 // GetFromPid gets a handle to the network namespace of a given pid.
