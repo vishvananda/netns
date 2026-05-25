@@ -2,6 +2,8 @@ package netns
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"golang.org/x/sys/unix"
 )
@@ -25,6 +27,42 @@ func (ns NsHandle) Equal(other NsHandle) bool {
 		return false
 	}
 	return (s1.Dev == s2.Dev) && (s1.Ino == s2.Ino)
+}
+
+// Name returns the name of the network namespace associated with the
+// handle.
+func (ns NsHandle) Name() (string, error) {
+	if ns == -1 {
+		return "", nil
+	}
+
+	var target unix.Stat_t
+	if err := unix.Fstat(int(ns), &target); err != nil {
+		return "", err
+	}
+
+	// Loop through all the named network namespaces to find the target
+	entries, err := os.ReadDir(bindMountPath)
+	if err != nil {
+		return "", err
+	}
+
+	for _, entry := range entries {
+		name := entry.Name()
+		path := filepath.Join(bindMountPath, name)
+
+		var stat unix.Stat_t
+		if err := unix.Stat(path, &stat); err != nil {
+			continue
+		}
+
+		if stat.Dev == target.Dev && stat.Ino == target.Ino {
+			return name, nil
+		}
+	}
+
+	// The target ns doesn't have a name
+	return "", nil
 }
 
 // String shows the file descriptor number and its dev and inode.
