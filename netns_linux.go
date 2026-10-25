@@ -3,7 +3,6 @@ package netns
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -29,34 +28,31 @@ const (
 	fallbackMountPath = "/var/run/netns" /* Fallback bind mount path (iproute2 convention) */
 )
 
-// getNetnsPath returns the appropriate path for network namespaces.
-// It tries bindMountPath first for backward compatibility, then falls back to fallbackMountPath.
-func getNetnsPath() string {
-	if _, err := os.Stat(bindMountPath); err == nil {
-		return bindMountPath
-	}
-	if _, err := os.Stat(fallbackMountPath); err == nil {
-		return fallbackMountPath
-	}
-	// Neither exists, default to original path for backward compatibility
-	return bindMountPath
-}
-
 // getNetnsPathForName returns the full path for a named network namespace.
 // It first checks if the namespace exists in bindMountPath, then in fallbackMountPath.
 func getNetnsPathForName(name string) string {
-	primaryPath := filepath.Join(bindMountPath, name)
+	return getNetnsPathForNameInDirs(name, bindMountPath, fallbackMountPath)
+}
+
+func getNetnsPathForNameInDirs(name, primaryDir, fallbackDir string) string {
+	primaryPath := filepath.Join(primaryDir, name)
 	if _, err := os.Stat(primaryPath); err == nil {
 		return primaryPath
 	}
 
-	fallbackPath := filepath.Join(fallbackMountPath, name)
+	fallbackPath := filepath.Join(fallbackDir, name)
 	if _, err := os.Stat(fallbackPath); err == nil {
 		return fallbackPath
 	}
 
 	// If neither exists, return the path based on directory availability for consistency
-	return filepath.Join(getNetnsPath(), name)
+	if _, err := os.Stat(primaryDir); err == nil {
+		return primaryPath
+	}
+	if _, err := os.Stat(fallbackDir); err == nil {
+		return fallbackPath
+	}
+	return primaryPath
 }
 
 // Setns sets namespace using golang.org/x/sys/unix.Setns.
@@ -84,30 +80,33 @@ func New() (NsHandle, error) {
 // NewNamed creates a new named network namespace, sets it as current,
 // and returns a handle to it
 func NewNamed(name string) (NsHandle, error) {
-	// Determine which directory to use and ensure it exists
-	netnsDir := getNetnsPath()
-	if err := os.MkdirAll(netnsDir, 0o755); err != nil {
+	return newNamed(getNetnsPathForName(name))
+}
+
+func newNamed(namedPath string) (NsHandle, error) {
+	// Ensure the namespace directory exists.
+	if err := os.MkdirAll(filepath.Dir(namedPath), 0o755); err != nil {
 		return None(), err
 	}
 
-	newNs, err := New()
-	if err != nil {
-		return None(), err
-	}
-
-	namedPath := path.Join(netnsDir, name)
-
+	// Reserve the name atomically before changing the calling thread's namespace.
 	f, err := os.OpenFile(namedPath, os.O_CREATE|os.O_EXCL, 0o444)
 	if err != nil {
-		newNs.Close()
 		return None(), err
 	}
 	f.Close()
+
+	newNs, err := New()
+	if err != nil {
+		_ = os.Remove(namedPath)
+		return None(), err
+	}
 
 	nsPath := fmt.Sprintf("/proc/%d/task/%d/ns/net", os.Getpid(), unix.Gettid())
 	err = unix.Mount(nsPath, namedPath, "bind", unix.MS_BIND, "")
 	if err != nil {
 		newNs.Close()
+		_ = os.Remove(namedPath)
 		return None(), err
 	}
 
